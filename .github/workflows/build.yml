@@ -1,0 +1,22 @@
+name: Build Kernel
+
+on:
+  workflow_dispatch:   # 允许你通过 GitHub 网页手动触发构建
+
+jobs:
+  build-kernel:
+    name: Build Kernel
+    runs-on: ubuntu-20.04   # 使用 Ubuntu 20.04 环境[reference:2]
+    steps:
+      - name: Build Kernel
+        uses: dabao1955/kernel_build_action@v1.2   # 强烈建议使用稳定版 tag[reference:3][reference:4]
+        with:
+          kernel-url: https://github.com/MiCode/Xiaomi_Kernel_OpenSource
+          kernel-branch: pissarro-r-oss
+          config: pissarro_defconfig   # 针对 pissarro 的配置[reference:5][reference:6]
+          arch: arm64                  # 架构为 arm64[reference:7]
+          aosp-gcc: true               # 使用 AOSP GCC 工具链[reference:8]
+          aosp-clang: true             # 使用 AOSP Clang 工具链[reference:9]
+          android-version: 11          # 对应 Android 11 (R)[reference:10]
+          aosp-clang-version: r383902  # 指定 Clang 版本[reference:11]
+          disable-lto: true            # 建议禁用 LTO 避免编译问题[reference:12]
