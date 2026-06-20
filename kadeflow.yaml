@@ -6,49 +6,33 @@ project:
 kade:
   config_overrides:
     kernel:
-      flavor: "gki"                # gki | non_gki
-
-    gki:
-      android_version: 14
-      kernel_version: "6.1"
-      target_arch: "aarch64"
-
-      driver:
-        project_name: "file_copy"
-        in_tree: false
-        external_src_dir: "${GITHUB_WORKSPACE}/code"
-        module_name: "file_copy.ko"
-        overwrite: true
-
-      # optional: Bazel args for >13
-      build:
-        bazel:
-          args: ["--config=fast"]
+      flavor: "non_gki"  # 关键：启用 non-GKI 模式[reference:9]
 
     non_gki:
+      # 1. 配置内核源码来源 (使用小米官方仓库)[reference:10]
       source:
-        type: "zip"                # repo | local | zip
-        zip_path: "${GITHUB_WORKSPACE}/kernel.zip"
-        zip_strip_root: true
+        type: "repo"
+        repo_url: "https://github.com/MiCode/Xiaomi_Kernel_OpenSource"
+        branch: "pissarro-r-oss"
 
+      # 2. 配置构建方式 (使用 script 模式)[reference:11]
       build:
         mode: "script"
-        script: "build.sh"
-        args: []
-        artifacts_dir: "out"
+        script: "build.sh"        # 将使用仓库根目录下的 build.sh
+        artifacts_dir: "out"      # 产物输出目录
 
+      # 3. 配置外置驱动 (SukiSU LKM)[reference:12][reference:13]
+      driver:
+        project_name: "sukisu"
+        in_tree: false            # 声明为外置驱动
+        external_src_dir: "${GITHUB_WORKSPACE}/code"
+        module_name: "sukisu.ko"  # 生成的模块名
+        overwrite: true
 
-# ABI control (optional but supported)
-abi:
-  upstream_patch: true             # always recommended for CI
-  # one of the following (optional):
-  symbols_file: "${GITHUB_WORKSPACE}/abi.symbols"
-  # or inline list:
-  # symbols:
-  #   - register_kprobe
-  #   - unregister_kprobe
-  sort: false
-  replace: false
+    # (可选但强烈推荐) 如果 SukiSU 需要特殊内核符号，在此声明[reference:14][reference:15]
+    abi:
+      upstream_patch: true
+      symbols_file: "${GITHUB_WORKSPACE}/abi.symbols"
 
 # Default CI flow: build + export (minimal, as you requested)
 flow:
